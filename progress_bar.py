@@ -6,12 +6,94 @@ Created on Thu Jun 18 13:01:20 2020
 Email: jeremias10j@gmail.com
 Github: j-abreu
 """
+from time import time
+from numpy import mean
+
+class ProgressBar:
+    
+    def __init__(self, total_data_len, title='', percentage=True, total_bar_len=40, symbol='-',
+                 style='simple'):
+        self.data_len = total_data_len
+        self.title = title
+        self.percentage = percentage
+        self.bar_len = total_bar_len
+        self.symbol = symbol
+        self.time_interval = [0,0]
+        self.times = []
+        self.switcher = True
+        self.style = style
+    
+    def __call__(self, done, style=None):
+        if style is None:
+            if self.style is 'simple':
+                self.simple_bar(done)
+            elif self.style is 'with_time':
+                self.bar_w_time(done)
+        else:
+            if style is 'simple':
+                self.simple_bar(done)
+            elif style is 'with_time':
+                self.bar_w_time(done)
+            else:
+                print('invalid bar style')
+    
+    def simple_bar(self, done):
+        cur_bar_len = int(done/self.data_len*self.bar_len)
+        cur_percentage = done/self.data_len*100
+        print('\r%s' % (' '*150), end='')
+        print('\r' + self.title + ' [%d/%d] [%s%s] %0.2f%% complete ' % (done, self.data_len,
+                                                          self.symbol*cur_bar_len,
+                                                          ' '*(self.bar_len-cur_bar_len),
+                                                          cur_percentage), end='')
+        if cur_percentage == 100.0:
+            print('Done!')
+            return True
+        else:
+            return False
+    def bar_w_time(self, done):
+        if self.switcher:
+            self.possible_total_calls = self.data_len/done
+            self.first_time = time()
+            self.time_interval[1] = self.first_time
+            self.switcher = False
+        self.time_interval[0] = self.time_interval[1]
+        self.time_interval[1] = time()
+        self.times.append(self.time_interval[1] - self.time_interval[0])
+        time_mean = mean(self.times[-10:])
+        
+        elapsed_mins = int((self.time_interval[1] - self.first_time)/60.0)
+        elapsed_secs = (self.time_interval[1] - self.first_time)%60
+        
+        remaining_mins = int(time_mean*max(self.possible_total_calls, 0)/60.0)
+        remaining_secs = time_mean*max(self.possible_total_calls, 0)%60.0
+        
+        self.possible_total_calls -= 1.0
+        
+        finished = self.simple_bar(done)
+        if not finished:
+            
+            print('elapsed time: %dmin %.2fs\t expected remaining time: %dmin %.2fs' % (elapsed_mins,
+                                                                                   elapsed_secs,
+                                                                                   remaining_mins,
+                                                                                   remaining_secs),
+                  end='')
+        else:
+            self = self.__init__(self.data_len, self.title, self.percentage, self.bar_len,
+                                 self.symbol, self.style)
 
 
-def progress_bar(done, total, title='copying...', percentage=True, bar_total_len=40, symbol='-'):
-    bar_len = int(done/total*bar_total_len)
-    perc = done/total*100
-    print('\r%s' % (' '*50), end='')
-    print('\r'+title + ' [%s%s] %0.2f%%' % (symbol*bar_len, ' '*(bar_total_len-bar_len), perc), end='')
-    if done == total:
-        print(' Done!')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
