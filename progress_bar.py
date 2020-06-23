@@ -8,7 +8,8 @@ Github: j-abreu
 """
 from time import time
 from numpy import mean
-
+from os import system
+from time import sleep
 class ProgressBar:
     
     def __init__(self, total_data_len, title='', percentage=True, total_bar_len=40, symbol='-',
@@ -35,21 +36,19 @@ class ProgressBar:
             elif style is 'with_time':
                 self.bar_w_time(done)
             else:
-                print('invalid bar style')
+                self.simple_bar(done)
     
     def simple_bar(self, done):
         cur_bar_len = int(done/self.data_len*self.bar_len)
         cur_percentage = done/self.data_len*100
-        print('\r%s' % (' '*150), end='')
+        print('\r%s' % (' '*100), end='')
         print('\r' + self.title + ' [%d/%d] [%s%s] %0.2f%% complete ' % (done, self.data_len,
                                                           self.symbol*cur_bar_len,
                                                           ' '*(self.bar_len-cur_bar_len),
                                                           cur_percentage), end='')
         if cur_percentage == 100.0:
             print('Done!')
-            return True
-        else:
-            return False
+            
     def bar_w_time(self, done):
         if self.switcher:
             self.possible_total_calls = self.data_len/done
@@ -59,7 +58,7 @@ class ProgressBar:
         self.time_interval[0] = self.time_interval[1]
         self.time_interval[1] = time()
         self.times.append(self.time_interval[1] - self.time_interval[0])
-        time_mean = mean(self.times[-10:])
+        time_mean = mean(self.times[-20:])
         
         elapsed_mins = int((self.time_interval[1] - self.first_time)/60.0)
         elapsed_secs = (self.time_interval[1] - self.first_time)%60
@@ -69,22 +68,23 @@ class ProgressBar:
         
         self.possible_total_calls -= 1.0
         
-        finished = self.simple_bar(done)
-        if not finished:
+        cur_bar_len = int(done/self.data_len*self.bar_len)
+        cur_percentage = done/self.data_len*100
+        
+        system('cls||clear')
+        print(self.title + ' [%d/%d] [%s%s] %0.2f%% complete ' % (done, self.data_len,
+                                                                  self.symbol*cur_bar_len,
+                                                                  ' '*(self.bar_len-cur_bar_len),
+                                                                  cur_percentage))
             
-            print('elapsed time: %dmin %.2fs\t expected remaining time: %dmin %.2fs' % (elapsed_mins,
+        print('elapsed time: %dmin %.2fs\t expected remaining time: %dmin %.2fs' % (elapsed_mins,
                                                                                    elapsed_secs,
                                                                                    remaining_mins,
-                                                                                   remaining_secs),
-                  end='')
-        else:
+                                                                                   remaining_secs))
+        if cur_percentage == 100.0:
+            print('Done!')
             self = self.__init__(self.data_len, self.title, self.percentage, self.bar_len,
                                  self.symbol, self.style)
-
-
-
-
-
 
 
 
