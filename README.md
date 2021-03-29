@@ -1,2 +1,2 @@
 # progress-bar
-Progress bars implementations in python
+Text-based progress bars implementations in python
